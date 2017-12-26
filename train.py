@@ -29,7 +29,7 @@ def initial_w_lamda_b(tvars, sess):
             sess.run(i.assign(np.zeros(i.shape)))
 
 def main(argv=None):
-    inputs = tf.placeholder(tf.float32, shape=[None, 100, 1], name='inputs')
+    inputs = tf.placeholder(tf.float32, shape=[None, 100, 40], name='inputs')
     labels = tf.placeholder(tf.float32, shape=[None, 3], name='labels')
     global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0),
                                   trainable=False)
@@ -51,6 +51,7 @@ def main(argv=None):
         #train_op = tf.no_op(name='train_op')
     train_op = opt.apply_gradients(zip(grads, tvars), global_step=global_step)
     saver = tf.train.Saver(tf.global_variables())
+    print('Loading data...')
     data_generator = datagen.generator(batch_size=256)
     start = time.time()
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:

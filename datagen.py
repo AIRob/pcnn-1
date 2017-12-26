@@ -27,16 +27,15 @@ def generator(input_size=100, batch_size=32):
     arr = load_txt(files[0])
     length = 10000
     arr = arr[:, 30000:40000]
-    X_arr = (arr[0] + arr[2])/2.0
-    y_arr = arr[-5:]
     while True:
         try:
-            X = np.zeros((batch_size, input_size, 1), dtype=np.float32)
+            X = np.zeros((batch_size, input_size, 40), dtype=np.float32)
             y = np.zeros((batch_size, 5), dtype=np.float32)
             seletecd_x = np.random.choice(range(length-input_size), size=[batch_size])
             seletecd_y = [i+input_size for i in seletecd_x]
             for i in range(batch_size):
-                X[i] = X_arr[range(seletecd_x[i], seletecd_x[i]+input_size)].reshape((input_size, 1))
+                a = arr[:40, range(seletecd_x[i], seletecd_x[i]+input_size)]
+                X[i] = np.transpose(a, [1, 0])
                 y[i] = arr[-5:, seletecd_y[i]]
             y = y.astype(np.int)
             y = y.reshape(-1)
