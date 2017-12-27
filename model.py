@@ -29,13 +29,46 @@ def pcnn(input_, scope='PCNN'):
         l2_loss += tf.nn.l2_loss(w1)
         l2_loss += tf.nn.l2_loss(b1)
         model = tf.nn.xw_plus_b(model, w1, b1)
+        model = tf.nn.dropout(model, keep_prob=0.9)
         w2 = tf.get_variable('w2', (32, 3))
         b2 = tf.get_variable('b2', (3))
         l2_loss += tf.nn.l2_loss(w2)
         l2_loss += tf.nn.l2_loss(b2)
         model = tf.nn.xw_plus_b(model, w2, b2)
+        model = tf.nn.dropout(model, keep_prob=0.9)
+        model = tf.nn.softmax(model)
     
     return model, l2_loss
+
+def pcnn1(input_, scope='PCNN'):
+    with tf.variable_scope(scope):
+        input_ = tf.expand_dims(input_, 3)
+        l2_loss = tf.constant(0.0)
+        model = tf.layers.conv2d(input_, 16, (4, 40))
+        model = tf.layers.batch_normalization(model)
+        model = tf.nn.relu(model)
+        model = tf.squeeze(model, 2)
+        model = tf.layers.conv1d(model, 16, (4, ))
+        model = tf.layers.batch_normalization(model)
+        model = tf.nn.relu(model)
+        model = tf.layers.max_pooling1d(model, 50, 1)
+        model = tf.layers.conv1d(model, 32, (3, ))
+        model = tf.layers.batch_normalization(model)
+        model = tf.nn.relu(model)
+        model = tf.layers.conv1d(model, 32, (3, ))
+        model = tf.layers.batch_normalization(model)
+        model = tf.nn.relu(model)
+        model = tf.layers.max_pooling1d(model, 25, 1)
+        shape = model.get_shape().as_list()
+        dim = np.prod(shape[1:])
+        model = tf.reshape(model, (-1, dim))
+        model = tf.layers.dense(model, 32)
+        model = tf.layers.dropout(model)
+        model = tf.layers.dense(model, 3)
+        model = tf.layers.dropout(model)
+        model = tf.nn.softmax(model)
+        
+    return model, tf.constant(0.0)
 
 def loss(X, y):
     with tf.variable_scope(tf.get_variable_scope(), reuse=None):
@@ -46,16 +79,44 @@ def loss(X, y):
                                                          labels=y)
         losses = tf.reduce_mean(losses) + 0.1 * l2_loss
     
-    return losses
+    with tf.variable_scope('accuracy'):
+        correct_predictions = tf.equal(tf.argmax(model, 1),
+                                       tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'),
+                                  name='accuracy')
+    
+    return losses, accuracy
+
+def loss1(X, y):
+    with tf.variable_scope(tf.get_variable_scope(), reuse=None):
+        model, l2_loss = pcnn1(X)
+        
+    with tf.variable_scope('loss'):
+        losses = tf.nn.softmax_cross_entropy_with_logits(logits=model, 
+                                                         labels=y)
+        losses = tf.reduce_mean(losses) + 0.1 * l2_loss
+    
+    with tf.variable_scope('accuracy'):
+        correct_predictions = tf.equal(tf.argmax(model, 1),
+                                       tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'),
+                                  name='accuracy')
+    
+    return losses, accuracy
+
 
 def test_pcnn():
     input_ = tf.placeholder(tf.float32, shape=[None, 100, 40], name='input')
     model = pcnn(input_)
+    
+def test_pcnn1():
+    input_ = tf.placeholder(tf.float32, shape=[None, 100, 40], name='input')
+    model = pcnn1(input_)
 
 
 if __name__ == '__main__':
     #----------------test_ctabl-----------------------------------------
-    test_pcnn()
+    test_pcnn1()
     with tf.Session() as sess:
         tf.summary.scalar('fake', 0)
         summary = tf.summary.merge_all()

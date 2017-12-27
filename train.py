@@ -35,13 +35,13 @@ def main(argv=None):
                                   trainable=False)
     learning_rate = tf.train.exponential_decay(FLAGS.learning_rate,
                                                global_step,
-                                               decay_steps=50000,
+                                               decay_steps=5000,
                                                decay_rate=0.94,
                                                staircase=True)
     tf.summary.scalar('learning_rate', learning_rate)
     #opt = tf.train.AdamOptimizer(learning_rate)
     opt = tf.train.GradientDescentOptimizer(learning_rate)
-    loss = model.loss(inputs, labels)
+    loss, accuracy = model.loss1(inputs, labels)
     tvars = tf.trainable_variables()
     #grads = opt.compute_gradients(loss, tvars)
     grads = tf.gradients(loss, tvars)
@@ -67,12 +67,12 @@ def main(argv=None):
             X, y = next(data_generator)
             y = y[:, 0, :]
             y = y.reshape((y.shape[0], 3))
-            tl, _ = sess.run([loss, train_op], feed_dict={inputs:X, labels:y})
+            tl, ac, _ = sess.run([loss, accuracy, train_op], feed_dict={inputs:X, labels:y})
             if step % 100 == 0:
                 avg_time_per_step = (time.time() - start) / 100
                 start = time.time()
-                print('Step {:06d}, loss {:.4f}, {:.2f} seconds/step'.format(
-                    step, tl, avg_time_per_step))
+                print('Step {:06d}, loss {:.4f}, acc {:g} {:.2f} seconds/step'.format(
+                    step, tl, ac, avg_time_per_step))
             if step % FLAGS.save_checkpoint_steps == 0:
                 saver.save(sess, FLAGS.checkpoint_path + 'model.ckpt', global_step=global_step)
             if step % FLAGS.summary_step == 0:
