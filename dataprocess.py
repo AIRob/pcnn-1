@@ -76,13 +76,16 @@ def data_generator(path, window_size=100, batch_size=32):
                 index = np.random.choice(down)
             else:
                 index = np.random.choice(nodir)
-            ret_X[i] = X[index-100:index]
+            ret_X[i] = X[index-99:index+1]
             ret_y[i] = y[index]
+        ret_y = ret_y + 1
+        ret_y = ret_y.reshape(-1)
+        ret_y = np.eye(3)[ret_y]
         yield ret_X, ret_y
                     
     
 if __name__ == '__main__':
     #load_csv('data/data/20140102.csv')
-    datagen = data_generator('data/data/20140102.csv')
+    datagen = data_generator('data/data/20140102.csv', window_size=104)
     for i in itertools.count():
         x, y = next(datagen)
