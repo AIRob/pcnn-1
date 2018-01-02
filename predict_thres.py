@@ -47,9 +47,10 @@ def main():
     negedge_path = '/home/zhaoke/justrypython/ks_idcard_ocr/testimg/neg_imgs/'
     background_path = '/home/zhaoke/gtest/ADEChallengeData2016/images/training2w/'
     
-    for step_cnt in range(10):
-        step = 227.0 + step_cnt * 32
-        print '-----------%f------------'%step
+    for step_cnt in range(50):
+        step = 355.0
+        thres = 0.5 + 0.01 * step_cnt
+        print '-----------%f------------'%thres
         starttime = datetime.datetime.now()
         print 'start time is ', starttime
         
@@ -64,7 +65,7 @@ def main():
             if img.shape[0] < 227 or img.shape[1] < 227:
                 continue
             result = model.predict(np.array([img]))
-            result = predict(result)
+            result = predict(result, thres=thres)
             pos_cnt += 1
             if result == 2:
                 pos_rgt += 1
@@ -83,7 +84,7 @@ def main():
             if img.shape[0] < 227 or img.shape[1] < 227:
                 continue
             result = model.predict(np.array([img]))
-            result = predict(result)
+            result = predict(result, thres=thres)
             neg_cnt += 1
             if result == 1:
                 neg_rgt += 1
@@ -102,7 +103,7 @@ def main():
             if img.shape[0] < 227 or img.shape[1] < 227:
                 continue
             result = model.predict(np.array([img]))
-            result = predict(result)
+            result = predict(result, thres=thres)
             bck_cnt += 1
             if result == 0:
                 bck_rgt += 1
