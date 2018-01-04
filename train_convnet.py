@@ -11,7 +11,7 @@ import dataprocess
 def main():
     #-----------------------------------------------------------------
     # 1: Set some necessary parameters
-    #data_path = 'model/v2_0_convnet_227_weights_epoch05_loss0.0033.h5'
+    #data_path = 'model/tf_alexnet_weights.h5'
     data_path = None
     size = 227
     labels = {'0': 0,
@@ -49,8 +49,8 @@ def main():
                                       #input_size=size,
                                       #batch_size=1,
                                       #labels=labels)
-    data_generator = dataprocess.data_generator('', window_size=227*227, batch_size=24)
-    valid_generator = dataprocess.data_generator('', window_size=227*227, batch_size=24)
+    data_generator = dataprocess.data_generator('', window_size=227*227, random_size=1e6, batch_size=64, mode='prime')
+    valid_generator = dataprocess.data_generator('', window_size=227*227, batch_size=64, mode='prime')
     #data_generator.next()
     
     #-----------------------------------------------------------------
@@ -58,7 +58,7 @@ def main():
     model.fit_generator(generator = data_generator,
                         steps_per_epoch = 5000,
                         epochs = 100,
-                        callbacks = [ModelCheckpoint('./model/convnet_227_weights_epoch{epoch:02d}_loss{loss:.4f}.h5',
+                        callbacks = [ModelCheckpoint('./model/pcnn_227_weights_epoch{epoch:02d}_loss{loss:.4f}.h5',
                                                      monitor='val_loss',
                                                      verbose=1,
                                                      save_best_only=True,

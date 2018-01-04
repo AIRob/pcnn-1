@@ -240,9 +240,9 @@ def VGG_19(weights_path=None, heatmap=False):
 
 def AlexNet(weights_path=None, heatmap=False):
     if heatmap:
-        inputs = Input(shape=(None, None, 1))
+        inputs = Input(shape=(None, None, 3))
     else:
-        inputs = Input(shape=(227, 227, 1))
+        inputs = Input(shape=(227, 227, 3))
 
     conv_1 = Conv2D(96, (11, 11), strides=(4, 4), activation='relu',
                            name='conv_1')(inputs)
